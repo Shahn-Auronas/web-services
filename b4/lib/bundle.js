@@ -1,5 +1,8 @@
 /*
  * Book Bundle API
+ * Using Q module to handle promises with its helper
+ * methods for interoperating with different asynchronous
+ * code-management approaches
  */
  'use strict';
 
@@ -7,7 +10,7 @@
        request = require('request');
 
 module.exports = function (config, app) {
-	//create a new bundle with specific name
+	//create a new bundle with specific name with POST handler
 	//curl -X POST http://localhost:3000/api/bundle?name=<name>
 	app.post('/api/bundle', function (req, res) {
 		let deferred = Q.defer();
@@ -22,7 +25,7 @@ module.exports = function (config, app) {
 			if (err) {
 				deferred.reject(err);
 			} else {
-				deferred.resolved([couchRes, body]);
+				deferred.resolve([couchRes, body]);
 			}
 		});
 		deferred.promise.then(function (args) {
