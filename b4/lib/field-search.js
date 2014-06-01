@@ -9,10 +9,13 @@
  const request = require('request');
 
  module.exports = function (config, app) {
+ 	//register a route with the Express app
  	app.get('/api/search/:view', function (req, res) {
+ 		//callback makes a request to CouchDB
  		request({
  			method: 'GET',
  			url: config.bookdb + '_design/books/_view/by_' + req.params.view,
+ 			//query string param to limit results
  			qs: {
  				startkey: JSON.stringify(req.query.q),
  				endkey: JSON.stringify(req.query.q + '\ufff0'),
