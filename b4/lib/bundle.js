@@ -13,6 +13,8 @@ module.exports = function (config, app) {
 	//create a new bundle with specific name with POST handler
 	//curl -X POST http://localhost:3000/api/bundle?name=<name>
 	app.post('/api/bundle', function (req, res) {
+		//deferred object class provides methods for
+		//working with the promise
 		let deferred = Q.defer();
 		request.post({
 			url: config.b4db,
@@ -39,9 +41,10 @@ module.exports = function (config, app) {
 			});
 		});
 	});
-	//Get a given bundle
+	//Express route to get a given bundle with id
 	//curl -X POST http://localhost:3000/api/bundle/<id>
 	app.get('/api/bundle/:id', function (req, res) {
+		//nfcall === Node function call
 		//nfcall: calls a node.js func with the given variadic args
 		//returning a promise that is fulfilled if the func calls back
 		//with a result or rejects if error
@@ -56,19 +59,23 @@ module.exports = function (config, app) {
 				    reason: err.code
 			    });
 		    })
+		    //force any unhandled rejected promises to throw
 		    .done();
 	});
 	//Set the specified bundle's name with the specified name
 	//curl -X PUT http://localhost:3000/api/bundle/<id>/name/<name>
 	app.put('/api/bundle/:id/name/:name', function (req, res) {
 		Q.nfcall(request.get, config.b4db + '/' + req.params.id)
+			//start the promise chain
 		    .then(function (args) {
 		  	    let couchRes = args[0],
 		  	        bundle = JSON.parse(args[1]);
 		  	    if (couchRes.statusCode !== 200) {
 		  		    return [couchRes, bundle];
 		  	    }
+		  	    //if 200 OK overwrite name field
 		  	    bundle.name = req.params.name;
+		  	    //PUT bundle doc back in CouchDB
 		  	    return Q.nfcall(reques.put, {
                     url: config.b4db + '/' + req.params.id,
                     json: bundle
@@ -104,7 +111,7 @@ module.exports = function (config, app) {
 		  		    return [couchRes, bundle];
 		  	    }
 		  	    //look up the book by its Project Gutenberg ID
-		  	    return Q.nfcall(reques.get, config.bookdb + '/' + req.params.pgid);
+		  	    return Q.nfcall(request.get, config.bookdb + '/' + req.params.pgid);
 		    })
 		    .then(function (args) {
 		  	    couchRes = args[0];
